@@ -6,7 +6,7 @@ include:
 {% set mysql_salt_pass = salt['pillar.get']('mysql:salt_user:salt_user_password', salt['grains.get']('server_id')) %}
 {% set mysql_salt_grants = salt['pillar.get']('mysql:salt_user:grants', []) %}
 {% set mysql_root_user = salt['pillar.get']('mysql:server:root_user', 'root') %}
-{% set mysql_root_pass = salt['pillar.get']('mysql:server:root_password', salt['grains.get']('server_id')) %}
+{% set mysql_root_password = salt['pillar.get']('mysql:server:root_password', salt['grains.get']('server_id')) %}
 {% set mysql_root_hash = salt['pillar.get']('mysql:server:root_password_hash', None) %}
 
 {% set mysql_host = salt['pillar.get']('mysql:server:host', 'localhost') %}
@@ -64,11 +64,11 @@ mysql_salt_user_with_root_user:
     - password: '{{ mysql_salt_pass }}'
     - connection_host: '{{ mysql_host }}'
     - connection_user: '{{ mysql_root_user }}'
-    - connection_pass: '{{ mysql_root_pass }}'
+    - connection_pass: '{{ mysql_root_password }}'
     - connection_charset: utf8
     - onlyif:
-      - mysql --user {{ mysql_root_user }} --password='{{ mysql_root_pass|replace("'", "'\"'\"'") }}' -h {{ mysql_host }} --execute="SELECT 1;"
-      - VALUE=$(mysql --user {{ mysql_root_user }} --password='{{ mysql_root_pass|replace("'", "'\"'\"'") }}' -ss -e "SELECT Grant_priv FROM mysql.user WHERE user = '{{ mysql_salt_user }}' AND host = '{{ host }}';"); if [ "$VALUE" = 'N' -o -z "$VALUE" ]; then /bin/true; else /bin/false; fi
+      - mysql --user {{ mysql_root_user }} --password='{{ mysql_root_password|replace("'", "'\"'\"'") }}' -h {{ mysql_host }} --execute="SELECT 1;"
+      - VALUE=$(mysql --user {{ mysql_root_user }} --password='{{ mysql_root_password|replace("'", "'\"'\"'") }}' -ss -e "SELECT Grant_priv FROM mysql.user WHERE user = '{{ mysql_salt_user }}' AND host = '{{ host }}';"); if [ "$VALUE" = 'N' -o -z "$VALUE" ]; then /bin/true; else /bin/false; fi
 {% if os_family in ['RedHat', 'Suse'] %}
     - require_in:
       - mysql_user: mysql_root_password
@@ -85,11 +85,11 @@ mysql_salt_user_with_root_user_grants:
     - host: '{{ host }}'
     - connection_host: '{{ mysql_host }}'
     - connection_user: '{{ mysql_root_user }}'
-    - connection_pass: '{{ mysql_root_pass }}'
+    - connection_pass: '{{ mysql_root_password }}'
     - connection_charset: utf8
     - onlyif:
-      - mysql --user {{ mysql_root_user }} --password='{{ mysql_root_pass|replace("'", "'\"'\"'") }}' -h {{ mysql_host }} --execute="SELECT 1;"
-      - VALUE=$(mysql --user {{ mysql_root_user }} --password='{{ mysql_root_pass|replace("'", "'\"'\"'") }}' -ss -e "SELECT Grant_priv FROM mysql.user WHERE user = '{{ mysql_salt_user }}' AND host = '{{ host }}';"); if [ "$VALUE" = 'N' -o -z "$VALUE" ]; then /bin/true; else /bin/false; fi
+      - mysql --user {{ mysql_root_user }} --password='{{ mysql_root_password|replace("'", "'\"'\"'") }}' -h {{ mysql_host }} --execute="SELECT 1;"
+      - VALUE=$(mysql --user {{ mysql_root_user }} --password='{{ mysql_root_password|replace("'", "'\"'\"'") }}' -ss -e "SELECT Grant_priv FROM mysql.user WHERE user = '{{ mysql_salt_user }}' AND host = '{{ host }}';"); if [ "$VALUE" = 'N' -o -z "$VALUE" ]; then /bin/true; else /bin/false; fi
     - require:
       - mysql_user: mysql_salt_user_with_root_user
 {% if os_family in ['RedHat', 'Suse'] %}
@@ -148,8 +148,8 @@ extend:
       - host: 'localhost'
       {%- if mysql_root_hash != None %}
       - password_hash: '{{ mysql_root_hash }}'
-      {%- elif mysql_root_pass != None %}
-      - password: '{{ mysql_root_pass }}'
+      {%- elif mysql_root_password != None %}
+      - password: '{{ mysql_root_password }}'
       {%- else %}
       - allow_passwordless: True
       {%- endif %}
